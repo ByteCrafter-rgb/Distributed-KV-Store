@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/ByteCrafter-rgb/kv-store/internal/store"
 )
@@ -35,7 +36,22 @@ func (s *Server) Start() error {
 	fmt.Printf("Server listening on %s\n", s.addr)
 
 	go s.acceptLoop()
+	go s.cleanupLoop()
 	return nil
+}
+
+func (s *Server) cleanupLoop() {
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-s.done:
+			return
+		case <-ticker.C:
+			s.store.CleanupExpired()
+		}
+	}
 }
 
 func (s *Server) acceptLoop() {
