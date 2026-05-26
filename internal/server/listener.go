@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"net"
 	"sync"
+
+	"github.com/ByteCrafter-rgb/kv-store/internal/store"
 )
 
 type Server struct {
 	addr     string
 	listener net.Listener
+	store    *store.Store
 	mu       sync.Mutex
 	conns    map[net.Conn]bool
 	done     chan struct{}
@@ -17,6 +20,7 @@ type Server struct {
 func NewServer(addr string) *Server {
 	return &Server{
 		addr:  addr,
+		store: store.NewStore(),
 		conns: make(map[net.Conn]bool),
 		done:  make(chan struct{}),
 	}
@@ -71,7 +75,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 	}()
 
 	fmt.Printf("Client connected: %s\n", conn.RemoteAddr())
-	handler := NewHandler(conn)
+	handler := NewHandler(conn, s.store)
 	handler.Run()
 }
 

@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+func DurationFromSeconds(seconds int64) *time.Duration {
+	d := time.Duration(seconds) * time.Second
+	return &d
+}
+
 type Value struct {
 	Data      string
 	ExpiresAt *time.Time
